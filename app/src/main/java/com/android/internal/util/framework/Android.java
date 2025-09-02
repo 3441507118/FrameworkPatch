@@ -3,7 +3,6 @@ package com.android.internal.util.framework;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.SystemProperties;
 import android.os.Build;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
@@ -45,6 +44,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+
+import java.lang.reflect.Method;
 
 
 
@@ -166,7 +167,7 @@ public final class Android {
     }
 
     public static boolean hasSystemFeature(boolean ret, String name) {
-        if (SystemProperties.getBoolean(PROP, false)) return ret;
+        if (SystemPropertiesReflect.getBoolean(PROP, false)) return ret;
 
         if (PackageManager.FEATURE_KEYSTORE_APP_ATTEST_KEY.equals(name) || PackageManager.FEATURE_STRONGBOX_KEYSTORE.equals(name)) return false;
 
@@ -174,7 +175,7 @@ public final class Android {
     }
 
     public static void newApplication(Context context) {
-        if (SystemProperties.getBoolean(PROP, false)) return;
+        if (SystemPropertiesReflect.getBoolean(PROP, false)) return;
         if (context == null) return;
 
         String packageName = context.getPackageName();
@@ -198,7 +199,7 @@ public final class Android {
     }
 
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
-        if (SystemProperties.getBoolean(PROP, false)) return caList;
+        if (SystemPropertiesReflect.getBoolean(PROP, false)) return caList;
         if (caList == null) throw new UnsupportedOperationException();
 
         try {
@@ -297,3 +298,4 @@ public final class Android {
         return caList;
     }
 }
+
