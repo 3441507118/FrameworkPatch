@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
+
+
 @Obfuscate
 public final class Android {
     private static final String TAG = "Play";
@@ -60,6 +62,50 @@ public final class Android {
     // These have to be set to the security patch level date and version of your ROM
     private static final int osVersionLevelVal = 140000;
     private static final int osPatchLevelVal = 202406;
+    
+    private static final class SystemPropertiesReflect {
+        public static String get(String key, String defaultValue) {
+            try {
+                Class<?> clazz = Class.forName("android.os.SystemProperties");
+                Method getter = clazz.getDeclaredMethod("get", String.class, String.class);
+                String value = (String) getter.invoke(null, key, defaultValue);
+                if (!TextUtils.isEmpty(value)) {
+                    return value;
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "Unable to read system properties via reflection");
+            }
+            return defaultValue;
+        }
+
+        public static boolean getBoolean(String key, boolean defaultValue) {
+            try {
+                Class<?> clazz = Class.forName("android.os.SystemProperties");
+                Method getter = clazz.getDeclaredMethod("getBoolean", String.class, boolean.class);
+                return (Boolean) getter.invoke(null, key, defaultValue);
+            } catch (Exception e) {
+                Log.d(TAG, "Unable to read boolean system properties via reflection, using default");
+                //  fallback to string-based get
+                String value = get(key, "");
+                if ("1".equals(value) || "true".equalsIgnoreCase(value)) {
+                    return true;
+                } else if ("0".equals(value) || "false".equalsIgnoreCase(value)) {
+                    return false;
+                }
+                return defaultValue;
+            }
+        }
+
+        public static void set(String key, String value) {
+            try {
+                Class<?> clazz = Class.forName("android.os.SystemProperties");
+                Method setter = clazz.getDeclaredMethod("set", String.class, String.class);
+                setter.invoke(null, key, value);
+            } catch (Exception e) {
+                Log.d(TAG, "Unable to set system properties via reflection");
+            }
+        }
+    }
 
     static {
         map.put("MANUFACTURER", Fingerprint.MANUFACTURER);
